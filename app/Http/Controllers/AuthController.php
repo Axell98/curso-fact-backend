@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Validator;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Gate;
 
@@ -93,13 +94,21 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
+        $role = auth('api')->user()->role;
+        $permissions = $role->permissions->pluck("name");
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
             "user" => [
                 "full_name" => auth('api')->user()->name,
-                "email" => auth('api')->user()->email
+                "email" => auth('api')->user()->email,
+                "avatar" => auth("api")->user()->avatar ? env("APP_URL")."storage/".auth("api")->user()->avatar : NULL,
+                "role" => [
+                    "id" => auth("api")->user()->role->id,
+                    "name" => auth("api")->user()->role->name
+                ],
+                "permissions" => $permissions,
             ],
         ]);
     }

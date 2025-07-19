@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Role\RoleController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Client\CompanyController;
+use App\Http\Controllers\Product\CategorieController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -26,4 +28,9 @@ Route::group([
 
     Route::post("users/{id}",[UserController::class,"update"]);
     Route::resource("users",UserController::class);
+
+    Route::post("categories/{id}",[CategorieController::class,"update"]);
+    Route::resource("categories",CategorieController::class);
+
+    Route::resource("company",CompanyController::class);
 });
