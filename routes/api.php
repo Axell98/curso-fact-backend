@@ -3,10 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Role\RoleController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Client\CompanyController;
 use App\Http\Controllers\Product\CategorieController;
+use App\Http\Controllers\Product\ProductController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -33,4 +35,10 @@ Route::group([
     Route::resource("categories",CategorieController::class);
 
     Route::resource("company",CompanyController::class);
+
+    Route::get("products/config",[ProductController::class,"config"]);
+    Route::post("products/{id}",[ProductController::class,"update"]);
+    Route::resource("products",ProductController::class);
+
+    Route::resource("clients",ClientController::class);
 });
