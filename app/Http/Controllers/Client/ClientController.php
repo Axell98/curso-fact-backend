@@ -48,7 +48,7 @@ class ClientController extends Controller
                 "message" => "EL N° DEL CLIENTE YA EXISTE"
             ]);
         }
-
+        $request->request->add(["user_id" => auth('api')->user()->id]);
         $client = Client::create($request->all());
 
         return response()->json([

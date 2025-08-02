@@ -9,6 +9,7 @@ use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Client\CompanyController;
 use App\Http\Controllers\Product\CategorieController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Sale\SaleController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -41,4 +42,6 @@ Route::group([
     Route::resource("products",ProductController::class);
 
     Route::resource("clients",ClientController::class);
+
+    Route::resource("sales",SaleController::class);
 });
