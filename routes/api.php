@@ -43,5 +43,6 @@ Route::group([
 
     Route::resource("clients",ClientController::class);
 
+    Route::get("sales/config",[SaleController::class,"config"]);
     Route::resource("sales",SaleController::class);
 });
