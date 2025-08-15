@@ -3,13 +3,14 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Role\RoleController;
-use App\Http\Controllers\User\UserController;
-use App\Http\Controllers\Client\CompanyController;
-use App\Http\Controllers\Product\CategorieController;
-use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Sale\SaleController;
+use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Client\ClientController;
+use App\Http\Controllers\Client\CompanyController;
+use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Sale\SaleDetailController;
+use App\Http\Controllers\Product\CategorieController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -44,5 +45,10 @@ Route::group([
     Route::resource("clients",ClientController::class);
 
     Route::get("sales/config",[SaleController::class,"config"]);
+    Route::post("sales/index",[SaleController::class,"index"]);
     Route::resource("sales",SaleController::class);
+
+    Route::resource("sale_details",SaleDetailController::class);
 });
+
+Route::get("sales-pdf/{id}",[SaleController::class,"pdf"]);
