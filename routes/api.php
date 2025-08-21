@@ -10,6 +10,7 @@ use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\CompanyController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Sale\SaleDetailController;
+use App\Http\Controllers\Sale\SalePaymentController;
 use App\Http\Controllers\Product\CategorieController;
 
 // Route::get('/user', function (Request $request) {
@@ -49,6 +50,7 @@ Route::group([
     Route::resource("sales",SaleController::class);
 
     Route::resource("sale_details",SaleDetailController::class);
+    Route::resource("sale_payments",SalePaymentController::class);
 });
 
 Route::get("sales-pdf/{id}",[SaleController::class,"pdf"]);

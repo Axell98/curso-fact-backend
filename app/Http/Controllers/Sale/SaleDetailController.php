@@ -45,7 +45,7 @@ class SaleDetailController extends Controller
         $subtotal =$sale->subtotal + $sale_detail->subtotal;
         $total = $subtotal + $igv;
 
-        $debt = $sale->debt + $total;//$sale_detail->subtotal;
+        $debt = $sale->debt + ($sale_detail->subtotal + $sale_detail->igv);
         $state_payment = 1;
         if($debt == 0){
             $state_payment = 3;

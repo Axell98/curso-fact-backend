@@ -615,6 +615,8 @@
             $icbper_total = round($sale->sale_details->sum('icbper'),2);
             $isc_total = round($sale->sale_details->sum('isc'),2);
 
+            $getTotalCal = round(($sale->total + $icbper_total + $isc_total) - ($discount_global_general + $sale->igv_discount_general),2);
+
             $getTotalSales = round(($sale->total + $icbper_total + $isc_total + $percepcion_igv_total) - ($discount_global_general + $sale->igv_discount_general + $retencion_igv_total),2);
             
             $getSubTotalSale = round($sale->subtotal - $discount_global_general,2);
@@ -642,17 +644,17 @@
             @switch($sale->retencion_igv)
                 @case(1)
                     <div>
-                        RETENCIÓN: <strong>{{$sale->currency}} {{round(($sale->total * 0.03),2)}} </strong>
+                        RETENCIÓN: <strong>{{$sale->currency}} {{round(($getTotalCal * 0.03),2)}} </strong>
                     </div>
                     @break
                 @case(2)
                     <div>
-                        DETRACCIÓN: <strong>{{$sale->currency}} {{round(($sale->total * 0.04),2)}} </strong>
+                        DETRACCIÓN: <strong>{{$sale->currency}} {{round(($getTotalCal * 0.04),2)}} </strong>
                     </div>
                     @break
                 @case(3)
                     <div>
-                        PERCEPCIÓN: <strong>{{$sale->currency}} {{round(($sale->total * 0.04),2)}} </strong>
+                        PERCEPCIÓN: <strong>{{$sale->currency}} {{round(($getTotalCal * 0.04),2)}} </strong>
                     </div>
                     @break
                 @default

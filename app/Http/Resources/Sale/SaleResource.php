@@ -21,16 +21,18 @@ class SaleResource extends JsonResource
         $isc_total = $this->resource->sale_details->sum("isc");
         $icbper_total = $this->resource->sale_details->sum("icbper");
         $total_percepcion = 0;
+        $TOTAL_CAL = ($this->resource->total + $isc_total + $icbper_total) - ($this->resource->discount_global + $this->resource->igv_discount_general);
+
         if($this->resource->retencion_igv == 3){
-            $total_percepcion = round(($this->resource->total * 0.04),5);
+            $total_percepcion = round(($TOTAL_CAL * 0.04),5);
         }
         $total_retencion = 0;
         if($this->resource->retencion_igv == 1){
-            $total_retencion = round(($this->resource->total * 0.03),5);
+            $total_retencion = round(($TOTAL_CAL * 0.03),5);
         }
         $total_detracion = 0;
         if($this->resource->retencion_igv == 2){
-            $total_detracion = round(($this->resource->total * 0.04),5);
+            $total_detracion = round(($TOTAL_CAL * 0.04),5);
         }
         $total_general = ($this->resource->total + $isc_total + $icbper_total + $total_percepcion) - 
                         ($this->resource->discount_global + $this->resource->igv_discount_general + $total_retencion + $total_detracion);

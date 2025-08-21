@@ -189,6 +189,11 @@ class SaleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $sale = Sale::find($id);
+        $sale->delete();
+        return response()->json([
+            "code" => 200,
+            "message" => "LA VENTA SE HA ELIMINADO CORRECTAMENTE"
+        ]);   
     }
 }
