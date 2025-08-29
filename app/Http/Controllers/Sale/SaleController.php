@@ -49,6 +49,7 @@ class SaleController extends Controller
         $today = today();
         $clients = Client::where("state",1)->orderBy("full_name","asc")->get();
         $products = Product::where("state",1)->where("is_especial_nota",0)->orderBy("title","asc")->get();
+        $products_nota = Product::where("state",1)->where("is_especial_nota",1)->orderBy("title","asc")->get();
 
         $n_transaction = 1000;
         $sale = Sale::orderBy("id","desc")->first();
@@ -59,6 +60,7 @@ class SaleController extends Controller
         return response()->json([
             "clients" => ClientCollection::make($clients),
             "products" => ProductCollection::make($products),
+            "product_notes" => ProductCollection::make($products_nota),
             "today" => $today->format("Y-m-d"),
             "n_transaction" => str_pad($n_transaction, 8, "0", STR_PAD_LEFT),//00001000
         ]);
@@ -71,6 +73,51 @@ class SaleController extends Controller
         }
         $pdf = Pdf::loadView('pdf_sale', compact('sale'));
         return $pdf->stream('sale_'.$id.'.pdf');
+    }
+
+    public function search_anticipo($anticipo){//f001-1
+        $sale = Sale::where("id",$anticipo)->first();
+        $sale_ope = Sale::where("n_operacion",$anticipo)->first();
+        if(!$sale_ope && !$sale){
+            return response()->json([
+                "code" => 403,
+                "message" => "NO SE ENCONTRO COINCIDENCIA EN EL CAMPO INGRESADO"
+            ]);
+        }
+        if($sale_ope){
+            $sale = $sale_ope;
+        }
+
+        if($sale && !$sale->n_operacion){
+            return response()->json([
+                "code" => 403,
+                "message" => "DEBES GENERAR EL COMPROBANTE ELECTRONICO PRIMERO, PARA QUE CUENTE COMO ANTICIPO"
+            ]);
+        }
+        if($sale && $sale->serie == 'B001'){
+            return response()->json([
+                "code" => 403,
+                "message" => "NO PUEDES GENERAR UN ANTICIPO APARTIR DE UNA BOLETA"
+            ]);
+        }
+
+        $exist_sale_anticipo = Sale::where("sales_anticipos","like","%".$sale->n_operacion."%")->first();
+        if($exist_sale_anticipo){
+            return response()->json([
+                "code" => 403,
+                "message" => "ESE COMPROBANTE YA SE HA USADO EN UN ANTICIPO ANTERIORMENTE"
+            ]);
+        }
+
+        return response()->json([
+            "sale" => [
+                "id" => $sale->id,
+                "n_operacion" => $sale->n_operacion,
+                "subtotal" => $sale->subtotal,
+                "total" => $sale->total,
+                "igv" => $sale->igv,
+            ],
+        ]);
     }
     /**
      * Store a newly created resource in storage.
@@ -103,8 +150,8 @@ class SaleController extends Controller
 
                 "igv_discount_general" => $request->igv_discount_general,
                 // "n_comprobante_anticipo" => $request->n_comprobante_anticipo,
-                // "amount_anticipo" => $request->amount_anticipo,
-                // "sales_anticipos" => $request->sales_anticipos ? json_encode($request->sales_anticipos) : null,
+                "amount_anticipo" => $request->amount_anticipo,
+                "sales_anticipos" => $request->sales_anticipos ? json_encode($request->sales_anticipos) : null,
                 "is_exportacion" => $request->is_exportacion,
                 "currency" => $request->currency,
             ]);
@@ -176,6 +223,8 @@ class SaleController extends Controller
     {
         $sale = Sale::find($id);
         
+        $sales_anticipos = $request->sales_anticipos ?? [];
+        $request->request->add(["sales_anticipos" => sizeof($sales_anticipos) > 0 ? json_encode($sales_anticipos) : NULL ]);
         $sale->update($request->all());
 
         return response()->json([

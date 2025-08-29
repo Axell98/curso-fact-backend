@@ -12,6 +12,7 @@ use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Sale\SaleDetailController;
 use App\Http\Controllers\Sale\SalePaymentController;
 use App\Http\Controllers\Product\CategorieController;
+use App\Http\Controllers\Sale\FacturacionEletronicaController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -47,10 +48,13 @@ Route::group([
 
     Route::get("sales/config",[SaleController::class,"config"]);
     Route::post("sales/index",[SaleController::class,"index"]);
+    Route::get("sales/search_anticipo/{anticipo}",[SaleController::class,"search_anticipo"]);
     Route::resource("sales",SaleController::class);
 
     Route::resource("sale_details",SaleDetailController::class);
     Route::resource("sale_payments",SalePaymentController::class);
+
+    Route::post("seend_sunat",[FacturacionEletronicaController::class,"sunat_seend"]);
 });
 
 Route::get("sales-pdf/{id}",[SaleController::class,"pdf"]);

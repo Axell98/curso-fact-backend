@@ -628,7 +628,7 @@
                 DESCUENTO: - {{$sale->currency}} {{$sale->discount + $sale->discount_global}}
                 <br>
                 @if ($sale->amount_anticipo > 0)
-                    ANTICIPO: - {{$sale->currency}} {{$sale->amount_anticipo}}
+                    ANTICIPO: - {{$sale->currency}} {{$sale->amount_anticipo + $sale->igv_discount_general}}
                     <br>
                 @endif
                 SUBTOTAL: {{$sale->currency}} {{$getSubTotalSale}}

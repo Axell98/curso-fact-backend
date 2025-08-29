@@ -39,7 +39,7 @@ class Sale extends Model
         "xml",
         "is_exportacion",
         "currency",
-        // "sales_anticipos",
+        "sales_anticipos",
     ];
 
     public function setCreatedAtAttribute($value)

@@ -17,11 +17,21 @@ class SaleResource extends JsonResource
     {
 
         $igv_general = $this->resource->igv + $this->resource->igv_discount_general;
-        
+
+        $discount_global_general = 0;
+
+        if($this->resource->discount_global > 0){
+            $discount_global_general += $this->resource->discount_global;
+        }
+
+        if($this->resource->amount_anticipo > 0){
+            $discount_global_general += $this->resource->amount_anticipo;
+        }
+
         $isc_total = $this->resource->sale_details->sum("isc");
         $icbper_total = $this->resource->sale_details->sum("icbper");
         $total_percepcion = 0;
-        $TOTAL_CAL = ($this->resource->total + $isc_total + $icbper_total) - ($this->resource->discount_global + $this->resource->igv_discount_general);
+        $TOTAL_CAL = ($this->resource->total + $isc_total + $icbper_total) - ($discount_global_general + $this->resource->igv_discount_general);
 
         if($this->resource->retencion_igv == 3){
             $total_percepcion = round(($TOTAL_CAL * 0.04),5);
@@ -35,7 +45,7 @@ class SaleResource extends JsonResource
             $total_detracion = round(($TOTAL_CAL * 0.04),5);
         }
         $total_general = ($this->resource->total + $isc_total + $icbper_total + $total_percepcion) - 
-                        ($this->resource->discount_global + $this->resource->igv_discount_general + $total_retencion + $total_detracion);
+                        ($discount_global_general + $this->resource->igv_discount_general + $total_retencion + $total_detracion);
 
         //     return Number(((sale_total.value + icbper_total.value + isc_total.value + total_percepcion.value) - 
         // (discount_global.value + igv_discount_global.value + total_retencion.value + total_detracion.value)).toFixed(5));
@@ -74,7 +84,7 @@ class SaleResource extends JsonResource
             "discount_global" => $this->resource->discount_global,
             "igv_discount_general" => $this->resource->igv_discount_general,
             "n_comprobante_anticipo" => $this->resource->n_comprobante_anticipo,
-            // "sales_anticipos" => $this->resource->sales_anticipos ? json_decode($this->resource->sales_anticipos,true) : null,
+            "sales_anticipos" => $this->resource->sales_anticipos ? json_decode($this->resource->sales_anticipos,true) : null,
             "amount_anticipo" => $this->resource->amount_anticipo,
             "cdr" => $this->resource->cdr ? env("APP_URL_XML_CDR").$this->resource->cdr : NULL,
             "xml" => $this->resource->xml ? env("APP_URL_XML_CDR").$this->resource->xml : NULL,
