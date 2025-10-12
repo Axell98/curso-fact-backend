@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 23-08-2025 a las 12:45:38
+-- Tiempo de generación: 10-09-2025 a las 23:26:24
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.1.25
 
@@ -111,7 +111,8 @@ INSERT INTO `clients` (`id`, `name`, `surname`, `full_name`, `phone`, `email`, `
 (2, NULL, NULL, 'Distribuidora Surco EIRL', '987444444', 'distribuidorasurco@eirl.com', 2, 'RUC', '20161515649', 'M', '2021-06-08 05:00:00', 1, 'Peru', '060702', '0607', '06', 'Chugur', 'Hualgayoc', 'Cajamarca', 1, '2025-07-31 01:22:15', '2025-08-21 02:44:44', NULL),
 (3, 'Sofia', 'Gutierrez', 'Sofia Gutierrez', '98562277', 'gutierrezsofia@gmail.com', 1, 'DNI', '74526328', 'M', '1999-07-30 05:00:00', 1, 'Peru', '160302', '1603', '16', 'Parinari', 'Loreto', 'Loreto', 1, '2025-07-31 01:27:50', '2025-07-31 01:44:08', NULL),
 (4, 'Enrique 2025', 'Guzman', 'Enrique 2025 Guzman', '94444545', 'enriqueguzman@gmail.com', 1, 'DNI', '41526328', 'M', '2004-06-30 05:00:00', 1, 'Peru', '050403', '0504', '05', 'Huamanguilla', 'Huanta', 'Ayacucho', 1, '2025-07-31 01:29:28', '2025-07-31 01:44:04', NULL),
-(5, NULL, NULL, 'TECNOLOGIA SAC 2026', '99888987', 'tecno@gmail.com', 2, 'RUC', '20161515650', 'M', '2015-10-30 05:00:00', 1, 'Peru', '190108', '1901', '19', 'San Francisco de Asís de Yarusyacan', 'Pasco', 'Pasco', 1, '2025-07-31 01:34:10', '2025-08-21 02:44:59', NULL);
+(5, NULL, NULL, 'TECNOLOGIA SAC 2026', '99888987', 'tecno@gmail.com', 2, 'RUC', '20161515650', 'M', '2015-10-30 05:00:00', 1, 'Peru', '190108', '1901', '19', 'San Francisco de Asís de Yarusyacan', 'Pasco', 'Pasco', 1, '2025-07-31 01:34:10', '2025-08-21 02:44:59', NULL),
+(6, NULL, NULL, 'Laravest Sac. 2025', '999999999', 'distribuidorasurco@eirl.com', 2, 'RUC', '20161515648', 'M', '2025-09-03 05:00:00', 1, 'Peru', '190203', '1902', '19', 'Goyllarisquizga', 'Daniel Alcides Carrión', 'Pasco', 1, '2025-09-04 01:43:22', '2025-09-04 01:43:22', NULL);
 
 -- --------------------------------------------------------
 
@@ -151,6 +152,112 @@ INSERT INTO `companies` (`id`, `razon_social`, `razon_social_comercial`, `phone`
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `electronic_notes`
+--
+
+CREATE TABLE `electronic_notes` (
+  `id` bigint(20) NOT NULL,
+  `serie` varchar(50) DEFAULT NULL,
+  `correlativo` bigint(20) UNSIGNED DEFAULT NULL,
+  `n_operacion` varchar(125) DEFAULT NULL,
+  `doc_nota` varchar(10) NOT NULL DEFAULT '07' COMMENT '07 credito,08 debito',
+  `type_nota` varchar(5) NOT NULL,
+  `n_comprobante` varchar(150) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) NOT NULL,
+  `type_client` smallint(6) NOT NULL DEFAULT 1 COMMENT '1 es cliente final, 2 es cliente empresa',
+  `currency` varchar(15) NOT NULL DEFAULT '''S/.''',
+  `subtotal` double NOT NULL DEFAULT 0,
+  `total` double NOT NULL DEFAULT 0,
+  `is_exportacion` tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
+  `discount` double DEFAULT 0,
+  `discount_global` double NOT NULL DEFAULT 0,
+  `igv` double NOT NULL,
+  `type_payment` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT '1 es al contado, 2 credito',
+  `state_sale` smallint(6) NOT NULL DEFAULT 1 COMMENT '1 es venta, 2 es cotizacion',
+  `state_payment` smallint(6) NOT NULL DEFAULT 1 COMMENT '1 es pendiente, 2 es parcial, 3 es completo',
+  `debt` double NOT NULL DEFAULT 0 COMMENT 'deuda',
+  `paid_out` double NOT NULL DEFAULT 0 COMMENT 'pagado o cancelado',
+  `retencion_igv` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '1 Retención , 2 Detracción , 3 Percepción',
+  `description` text DEFAULT NULL,
+  `description_motivo` text DEFAULT NULL,
+  `amount_anticipo` double DEFAULT NULL,
+  `sales_anticipos` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sales_anticipos`)),
+  `cdr` varchar(250) DEFAULT NULL,
+  `xml` varchar(250) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `electronic_notes`
+--
+
+INSERT INTO `electronic_notes` (`id`, `serie`, `correlativo`, `n_operacion`, `doc_nota`, `type_nota`, `n_comprobante`, `user_id`, `client_id`, `type_client`, `currency`, `subtotal`, `total`, `is_exportacion`, `discount`, `discount_global`, `igv`, `type_payment`, `state_sale`, `state_payment`, `debt`, `paid_out`, `retencion_igv`, `description`, `description_motivo`, `amount_anticipo`, `sales_anticipos`, `cdr`, `xml`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1000, 'FF01', 1, 'FF01-1', '07', '01', 'F001-16', 1, 2, 2, 'S/.', 37831.86441, 44641.6, 0, 0, 0, 6809.73559, 0, 0, 0, 0, 0, 0, NULL, 'SE HIZO MAL LA VENTA', NULL, NULL, '/storage/cdrs/68b255340b0e4.zip', '/storage/xml/FF-20161515648-1-FF01-1000 20250829_203444.xml', '2025-08-29 20:34:39', '2025-08-29 20:34:44', NULL),
+(1001, 'FF01', 2, 'FF01-2', '07', '02', 'F001-16', 1, 2, 2, 'S/.', 37831.86441, 44641.6, 0, 0, 0, 6809.73559, 0, 0, 0, 0, 0, 0, NULL, 'SE PUSO MAL EL RUC DEL CLIENTE', NULL, NULL, '/storage/cdrs/68b255ce10fc4.zip', '/storage/xml/FF-20161515648-2-FF01-1001 20250829_203718.xml', '2025-08-29 20:37:17', '2025-08-29 20:37:18', NULL),
+(1002, 'FF01', 3, 'FF01-3', '07', '03', 'F001-16', 1, 2, 2, 'S/.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, 'SE PUSO MAL EL NOMBRE DEL PRODUCTO', NULL, NULL, '/storage/cdrs/68b25622c8d75.zip', '/storage/xml/FF-20161515648-3-FF01-1002 20250829_203842.xml', '2025-08-29 20:38:42', '2025-08-29 20:38:42', NULL),
+(1003, 'FF01', 4, 'FF01-4', '07', '04', 'F001-16', 1, 2, 2, 'S/.', 50, 59, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, NULL, 'SE VA AGREGAR UN DESCUENTO A LA VENTA', NULL, NULL, '/storage/cdrs/68b256a4e1674.zip', '/storage/xml/FF-20161515648-4-FF01-1003 20250829_204052.xml', '2025-08-29 20:40:52', '2025-08-29 20:40:52', NULL),
+(1004, 'FF01', 5, 'FF01-5', '07', '05', 'F001-16', 1, 2, 2, 'S/.', 25.42, 30, 0, 0, 0, 4.58, 0, 0, 0, 0, 0, 0, NULL, 'EL CLIENTE PIDIO EL DESCUENTO', NULL, NULL, '/storage/cdrs/68b2576a47e6e.zip', '/storage/xml/FF-20161515648-5-FF01-1004 20250829_204410.xml', '2025-08-29 20:44:10', '2025-08-29 20:44:10', NULL),
+(1005, 'FF01', 6, 'FF01-6', '07', '06', 'F001-16', 1, 2, 2, 'S/.', 1271.18644, 1500, 0, 0, 0, 228.81356, 0, 0, 0, 0, 0, 0, NULL, 'EL PRODUCTO VINO DEFECTUOSO', NULL, NULL, '/storage/cdrs/68b257ae65c90.zip', '/storage/xml/FF-20161515648-6-FF01-1005 20250829_204518.xml', '2025-08-29 20:45:18', '2025-08-29 20:45:18', NULL),
+(1006, 'FF01', 7, 'FF01-7', '07', '07', 'F001-17', 1, 2, 2, 'S/.', 120, 141.6, 0, 0, 0, 21.6, 0, 0, 0, 0, 0, 0, NULL, 'DE LAS 3 VINO DEFECTUOSA 1', NULL, NULL, '/storage/cdrs/68b25827419da.zip', '/storage/xml/FF-20161515648-7-FF01-1006 20250829_204719.xml', '2025-08-29 20:47:18', '2025-08-29 20:47:19', NULL),
+(1007, 'FF01', 8, 'FF01-8', '08', '01', 'F001-17', 1, 2, 2, 'S/.', 90, 106.2, 0, 0, 0, 16.2, 0, 0, 0, 0, 0, 0, NULL, 'NO SE CUMPLIERON CON LOS TIEMPOS DEL PRESTAMO', NULL, NULL, '/storage/cdrs/68b25876b714c.zip', '/storage/xml/FF-20161515648-8-FF01-1007 20250829_204838.xml', '2025-08-29 20:48:38', '2025-08-29 20:48:38', NULL),
+(1008, 'FF01', 9, 'FF01-9', '08', '03', 'F001-17', 1, 2, 2, 'S/.', 50, 59, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, NULL, 'NO SE CUMPLIERON CON LOS TIEMPOS DEL ENTREGA', NULL, NULL, '/storage/cdrs/68b258a3e86a8.zip', '/storage/xml/FF-20161515648-9-FF01-1008 20250829_204923.xml', '2025-08-29 20:49:23', '2025-08-29 20:49:23', NULL),
+(1009, 'FF01', 10, 'FF01-10', '08', '02', 'F001-17', 1, 2, 2, 'S/.', 450, 531, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, NULL, 'SE COBRO MUY BARATO', NULL, NULL, '/storage/cdrs/68b258ce6bfbc.zip', '/storage/xml/FF-20161515648-10-FF01-1009 20250829_205006.xml', '2025-08-29 20:50:06', '2025-08-29 20:50:06', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `electronic_note_details`
+--
+
+CREATE TABLE `electronic_note_details` (
+  `id` bigint(20) NOT NULL,
+  `electronic_note_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `product_categorie_id` bigint(20) NOT NULL,
+  `tip_afe_igv` int(3) UNSIGNED NOT NULL DEFAULT 10,
+  `per_icbper` double NOT NULL DEFAULT 0,
+  `icbper` double NOT NULL DEFAULT 0,
+  `percentage_isc` double UNSIGNED NOT NULL DEFAULT 0,
+  `isc` double UNSIGNED NOT NULL DEFAULT 0,
+  `unidad_medida` varchar(25) NOT NULL,
+  `quantity` double NOT NULL DEFAULT 1,
+  `price_base` double NOT NULL DEFAULT 0,
+  `price_final` double NOT NULL DEFAULT 0,
+  `discount` double DEFAULT 0,
+  `subtotal` double NOT NULL DEFAULT 0 COMMENT 'Es el precio unitario - descuento',
+  `igv` double DEFAULT 0,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `electronic_note_details`
+--
+
+INSERT INTO `electronic_note_details` (`id`, `electronic_note_id`, `product_id`, `product_categorie_id`, `tip_afe_igv`, `per_icbper`, `icbper`, `percentage_isc`, `isc`, `unidad_medida`, `quantity`, `price_base`, `price_final`, `discount`, `subtotal`, `igv`, `description`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1000, 4, 1, 10, 0, 0, 0, 0, 'NIU', 1, 36440.677966, 43000, 0, 36440.677966, 6559.32203388, NULL, '2025-08-29 20:34:39', '2025-08-29 20:34:39', NULL),
+(2, 1000, 3, 2, 10, 0, 0, 0, 0, 'NIU', 1, 120, 141.6, 0, 120, 21.6, NULL, '2025-08-29 20:34:39', '2025-08-29 20:34:39', NULL),
+(3, 1000, 1, 3, 10, 0, 0, 0, 0, 'NIU', 1, 1271.186441, 1500, 0, 1271.186441, 228.81355938, NULL, '2025-08-29 20:34:39', '2025-08-29 20:34:39', NULL),
+(4, 1001, 4, 1, 10, 0, 0, 0, 0, 'NIU', 1, 36440.677966, 43000, 0, 36440.677966, 6559.32203388, NULL, '2025-08-29 20:37:17', '2025-08-29 20:37:17', NULL),
+(5, 1001, 3, 2, 10, 0, 0, 0, 0, 'NIU', 1, 120, 141.6, 0, 120, 21.6, NULL, '2025-08-29 20:37:17', '2025-08-29 20:37:17', NULL),
+(6, 1001, 1, 3, 10, 0, 0, 0, 0, 'NIU', 1, 1271.186441, 1500, 0, 1271.186441, 228.81355938, NULL, '2025-08-29 20:37:17', '2025-08-29 20:37:17', NULL),
+(7, 1002, 4, 1, 10, 0.5, 0, 0, 0, 'NIU', 1, 0, 0, 0, 0, 0, NULL, '2025-08-29 20:38:42', '2025-08-29 20:38:42', NULL),
+(8, 1003, 12, 2, 10, 0.5, 0, 0, 0, 'ZZ', 1, 50, 59, 0, 50, 9, NULL, '2025-08-29 20:40:52', '2025-08-29 20:40:52', NULL),
+(9, 1004, 3, 2, 10, 0.5, 0, 0, 0, 'NIU', 1, 25.42373, 30, 0, 25.42, 4.58, NULL, '2025-08-29 20:44:10', '2025-08-29 20:44:10', NULL),
+(10, 1005, 1, 3, 10, 0, 0, 0, 0, 'NIU', 1, 1271.186441, 1500, 0, 1271.186441, 228.81355938, NULL, '2025-08-29 20:45:18', '2025-08-29 20:45:18', NULL),
+(11, 1006, 3, 2, 10, 0.5, 0, 0, 0, 'NIU', 1, 120, 141.6, 0, 120, 21.6, NULL, '2025-08-29 20:47:18', '2025-08-29 20:47:18', NULL),
+(12, 1007, 13, 2, 10, 0.5, 0, 0, 0, 'ZZ', 1, 90, 106.2, 0, 90, 16.2, NULL, '2025-08-29 20:48:38', '2025-08-29 20:48:38', NULL),
+(13, 1008, 15, 2, 10, 0.5, 0, 0, 0, 'ZZ', 1, 50, 59, 0, 50, 9, NULL, '2025-08-29 20:49:23', '2025-08-29 20:49:23', NULL),
+(14, 1009, 3, 2, 10, 0.5, 0, 0, 0, 'NIU', 3, 150, 177, 0, 450, 81, NULL, '2025-08-29 20:50:06', '2025-08-29 20:50:06', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `failed_jobs`
 --
 
@@ -163,6 +270,93 @@ CREATE TABLE `failed_jobs` (
   `exception` longtext NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `guia_remisions`
+--
+
+CREATE TABLE `guia_remisions` (
+  `id` bigint(20) NOT NULL,
+  `serie` varchar(50) DEFAULT NULL,
+  `correlativo` bigint(20) UNSIGNED DEFAULT NULL,
+  `n_operacion` varchar(125) DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) NOT NULL,
+  `type_client` smallint(6) NOT NULL DEFAULT 1 COMMENT '1 es cliente final, 2 es cliente empresa',
+  `total` double NOT NULL DEFAULT 0,
+  `quantity_total` double NOT NULL,
+  `motivo_translado` varchar(5) NOT NULL,
+  `num_dam` varchar(150) DEFAULT NULL,
+  `type_transport` smallint(1) NOT NULL DEFAULT 1 COMMENT '1 es publico, 2 es privado',
+  `punto_partida` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`punto_partida`)),
+  `punto_llegada` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`punto_llegada`)),
+  `transporte_datos` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `conductor_datos` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `cdr` varchar(250) DEFAULT NULL,
+  `xml` varchar(250) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `guia_remisions`
+--
+
+INSERT INTO `guia_remisions` (`id`, `serie`, `correlativo`, `n_operacion`, `user_id`, `client_id`, `type_client`, `total`, `quantity_total`, `motivo_translado`, `num_dam`, `type_transport`, `punto_partida`, `punto_llegada`, `transporte_datos`, `conductor_datos`, `description`, `cdr`, `xml`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'T001', 1, 'T001-1', 1, 4, 2, 11.7, 9, '01', '0', 1, '{\"ubigeo_region\":\"18\",\"ubigeo_provincia\":\"1802\",\"ubigeo_distrito\":\"180202\",\"region\":\"Moquegua\",\"provincia\":\"General S\\u00e1nchez Cerro\",\"distrito\":\"Chojata\",\"address\":\"AV LIMA\"}', '{\"ubigeo_region\":\"20\",\"ubigeo_provincia\":\"2003\",\"ubigeo_distrito\":\"200304\",\"region\":\"Piura\",\"provincia\":\"Huancabamba\",\"distrito\":\"Huarmaca\",\"address\":\"AV LIMA\"}', '{\"n_document_ruc\":20161515668,\"razon_social_transportista\":\"TRANSPORTES S.A.C\",\"nro_mtc\":\"0001\"}', NULL, 'fdsfdsfd', '/storage/cdrs/68bb8b3e8b637.zip', '/storage/xml/FF-20161515648-1-T001-1 20250905_201542.xml', '2025-09-05 20:15:41', '2025-09-05 20:15:42', NULL),
+(2, 'T001', 2, 'T001-2', 1, 4, 2, 19.7, 13, '02', '0', 1, '{\"ubigeo_region\":\"18\",\"ubigeo_provincia\":\"1802\",\"ubigeo_distrito\":\"180202\",\"region\":\"Moquegua\",\"provincia\":\"General S\\u00e1nchez Cerro\",\"distrito\":\"Chojata\",\"address\":\"AV LIMA\"}', '{\"ubigeo_region\":\"20\",\"ubigeo_provincia\":\"2003\",\"ubigeo_distrito\":\"200304\",\"region\":\"Piura\",\"provincia\":\"Huancabamba\",\"distrito\":\"Huarmaca\",\"address\":\"AV LIMA\"}', '{\"n_document_ruc\":20161515668,\"razon_social_transportista\":\"TRANSPORTES S.A.C\",\"nro_mtc\":\"0001\"}', NULL, 'fdsfdsfd', '/storage/cdrs/68bb8ba660be4.zip', '/storage/xml/FF-20161515648-2-T001-2 20250905_201726.xml', '2025-09-05 20:17:24', '2025-09-05 20:17:26', NULL),
+(3, 'T001', 3, 'T001-3', 1, 5, 2, 19.7, 13, '04', '0', 1, '{\"ubigeo_region\":\"18\",\"ubigeo_provincia\":\"1802\",\"ubigeo_distrito\":\"180202\",\"region\":\"Moquegua\",\"provincia\":\"General S\\u00e1nchez Cerro\",\"distrito\":\"Chojata\",\"address\":\"AV LIMA\"}', '{\"ubigeo_region\":\"20\",\"ubigeo_provincia\":\"2003\",\"ubigeo_distrito\":\"200304\",\"region\":\"Piura\",\"provincia\":\"Huancabamba\",\"distrito\":\"Huarmaca\",\"address\":\"AV LIMA\"}', '{\"n_document_ruc\":20161515668,\"razon_social_transportista\":\"TRANSPORTES S.A.C\",\"nro_mtc\":\"0001\"}', NULL, 'fdsfdsfd', '/storage/cdrs/68bb8c0a920f3.zip', '/storage/xml/FF-20161515648-3-T001-3 20250905_201906.xml', '2025-09-05 20:19:05', '2025-09-05 20:19:06', NULL),
+(5, 'T001', 4, 'T001-4', 1, 4, 2, 1358, 14, '08', '118-2024-10-4', 1, '{\"ubigeo_region\":\"18\",\"ubigeo_provincia\":\"1802\",\"ubigeo_distrito\":\"180202\",\"region\":\"Moquegua\",\"provincia\":\"General S\\u00e1nchez Cerro\",\"distrito\":\"Chojata\",\"address\":\"AV LIMA\"}', '{\"ubigeo_region\":\"20\",\"ubigeo_provincia\":\"2003\",\"ubigeo_distrito\":\"200304\",\"region\":\"Piura\",\"provincia\":\"Huancabamba\",\"distrito\":\"Huarmaca\",\"address\":\"AV LIMA\"}', '{\"n_document_ruc\":20161515668,\"razon_social_transportista\":\"TRANSPORTES S.A.C\",\"nro_mtc\":\"0001\"}', NULL, 'fdsfdsfd', '/storage/cdrs/68bb8cb06dc98.zip', '/storage/xml/FF-20161515648-4-T001-5 20250905_202152.xml', '2025-09-05 20:21:51', '2025-09-05 20:21:52', NULL),
+(7, 'T001', 5, 'T001-5', 1, 4, 2, 1358, 14, '09', '082-2024-40-12345', 1, '{\"ubigeo_region\":\"18\",\"ubigeo_provincia\":\"1802\",\"ubigeo_distrito\":\"180202\",\"region\":\"Moquegua\",\"provincia\":\"General S\\u00e1nchez Cerro\",\"distrito\":\"Chojata\",\"address\":\"AV LIMA\"}', '{\"ubigeo_region\":\"20\",\"ubigeo_provincia\":\"2003\",\"ubigeo_distrito\":\"200304\",\"region\":\"Piura\",\"provincia\":\"Huancabamba\",\"distrito\":\"Huarmaca\",\"address\":\"AV LIMA\"}', '{\"n_document_ruc\":20161515668,\"razon_social_transportista\":\"TRANSPORTES S.A.C\",\"nro_mtc\":\"0001\"}', NULL, 'fdsfdsfd', '/storage/cdrs/68bb8cd417a89.zip', '/storage/xml/FF-20161515648-5-T001-7 20250905_202228.xml', '2025-09-05 20:22:26', '2025-09-05 20:22:28', NULL),
+(8, 'T001', 6, 'T001-6', 1, 2, 2, 180, 9, '14', '082-2024-40-12345', 1, '{\"ubigeo_region\":\"18\",\"ubigeo_provincia\":\"1802\",\"ubigeo_distrito\":\"180202\",\"region\":\"Moquegua\",\"provincia\":\"General S\\u00e1nchez Cerro\",\"distrito\":\"Chojata\",\"address\":\"AV LIMA\"}', '{\"ubigeo_region\":\"20\",\"ubigeo_provincia\":\"2003\",\"ubigeo_distrito\":\"200304\",\"region\":\"Piura\",\"provincia\":\"Huancabamba\",\"distrito\":\"Huarmaca\",\"address\":\"AV LIMA\"}', '{\"n_document_ruc\":20161515668,\"razon_social_transportista\":\"TRANSPORTES S.A.C\",\"nro_mtc\":\"0001\"}', NULL, 'fdsfdsfdjhgjghj', '/storage/cdrs/68bb8d13d4081.zip', '/storage/xml/FF-20161515648-6-T001-8 20250905_202331.xml', '2025-09-05 20:23:30', '2025-09-05 20:23:31', NULL),
+(9, 'T001', 7, 'T001-7', 1, 2, 2, 230, 14, '18', '082-2024-40-12345', 1, '{\"ubigeo_region\":\"18\",\"ubigeo_provincia\":\"1802\",\"ubigeo_distrito\":\"180202\",\"region\":\"Moquegua\",\"provincia\":\"General S\\u00e1nchez Cerro\",\"distrito\":\"Chojata\",\"address\":\"AV LIMA\"}', '{\"ubigeo_region\":\"20\",\"ubigeo_provincia\":\"2003\",\"ubigeo_distrito\":\"200304\",\"region\":\"Piura\",\"provincia\":\"Huancabamba\",\"distrito\":\"Huarmaca\",\"address\":\"AV LIMA\"}', '{\"n_document_ruc\":20161515668,\"razon_social_transportista\":\"TRANSPORTES S.A.C\",\"nro_mtc\":\"0001\"}', NULL, 'fdsfdsfdjhgjghj', '/storage/cdrs/68bb8d55d2b8c.zip', '/storage/xml/FF-20161515648-7-T001-9 20250905_202437.xml', '2025-09-05 20:24:36', '2025-09-05 20:24:37', NULL),
+(10, 'T001', 8, 'T001-8', 1, 2, 2, 530, 19, '01', '082-2024-40-12345', 2, '{\"ubigeo_region\":\"18\",\"ubigeo_provincia\":\"1802\",\"ubigeo_distrito\":\"180202\",\"region\":\"Moquegua\",\"provincia\":\"General S\\u00e1nchez Cerro\",\"distrito\":\"Chojata\",\"address\":\"AV LIMA\"}', '{\"ubigeo_region\":\"20\",\"ubigeo_provincia\":\"2003\",\"ubigeo_distrito\":\"200304\",\"region\":\"Piura\",\"provincia\":\"Huancabamba\",\"distrito\":\"Huarmaca\",\"address\":\"AV LIMA\"}', NULL, '{\"type_document\":\"1\",\"name_document\":\"DNI\",\"n_document\":70807621,\"full_name_conductor\":\"RODRIGUEZ VALENCIA\",\"placa_vehiculo\":\"ABC123\",\"n_licencia\":\"0001122020\"}', 'fdsfdsfdjhgjghj', '/storage/cdrs/68bb8dc3a7ec0.zip', '/storage/xml/FF-20161515648-8-T001-10 20250905_202627.xml', '2025-09-05 20:26:26', '2025-09-05 20:26:27', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `guia_remision_details`
+--
+
+CREATE TABLE `guia_remision_details` (
+  `id` bigint(20) NOT NULL,
+  `guia_remision_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `product_categorie_id` bigint(20) NOT NULL,
+  `unidad_medida` varchar(25) NOT NULL,
+  `quantity` double NOT NULL DEFAULT 1,
+  `peso` double NOT NULL DEFAULT 0,
+  `total` double NOT NULL DEFAULT 0,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `guia_remision_details`
+--
+
+INSERT INTO `guia_remision_details` (`id`, `guia_remision_id`, `product_id`, `product_categorie_id`, `unidad_medida`, `quantity`, `peso`, `total`, `description`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 1, 'DZN', 9, 1.3, 11.7, NULL, '2025-09-05 20:15:41', '2025-09-05 20:15:41', NULL),
+(2, 2, 1, 1, 'DZN', 9, 1.3, 11.7, NULL, '2025-09-05 20:17:24', '2025-09-05 20:17:24', NULL),
+(3, 2, 4, 1, 'PK', 4, 2, 8, NULL, '2025-09-05 20:17:24', '2025-09-05 20:17:24', NULL),
+(4, 3, 1, 1, 'DZN', 9, 1.3, 11.7, NULL, '2025-09-05 20:19:05', '2025-09-05 20:19:05', NULL),
+(5, 3, 4, 1, 'PK', 4, 2, 8, NULL, '2025-09-05 20:19:05', '2025-09-05 20:19:05', NULL),
+(8, 5, 3, 1, 'U', 9, 150, 1350, NULL, '2025-09-05 20:21:51', '2025-09-05 20:21:51', NULL),
+(9, 5, 4, 1, '12U', 5, 1.6, 8, NULL, '2025-09-05 20:21:51', '2025-09-05 20:21:51', NULL),
+(12, 7, 3, 1, 'U', 9, 150, 1350, NULL, '2025-09-05 20:22:26', '2025-09-05 20:22:26', NULL),
+(13, 7, 4, 1, '12U', 5, 1.6, 8, NULL, '2025-09-05 20:22:26', '2025-09-05 20:22:26', NULL),
+(14, 8, 7, 2, 'SA', 9, 20, 180, NULL, '2025-09-05 20:23:30', '2025-09-05 20:23:30', NULL),
+(15, 9, 7, 2, 'SA', 9, 20, 180, NULL, '2025-09-05 20:24:36', '2025-09-05 20:24:36', NULL),
+(16, 9, 4, 3, 'BX', 5, 10, 50, NULL, '2025-09-05 20:24:36', '2025-09-05 20:24:36', NULL),
+(17, 10, 7, 2, 'SA', 9, 20, 180, NULL, '2025-09-05 20:26:26', '2025-09-05 20:26:26', NULL),
+(18, 10, 4, 3, 'BX', 5, 10, 50, NULL, '2025-09-05 20:26:26', '2025-09-05 20:26:26', NULL),
+(19, 10, 4, 1, 'PK', 5, 60, 300, NULL, '2025-09-05 20:26:26', '2025-09-05 20:26:26', NULL);
 
 -- --------------------------------------------------------
 
@@ -372,13 +566,17 @@ CREATE TABLE `products` (
 INSERT INTO `products` (`id`, `title`, `sku`, `categorie_id`, `imagen`, `price_general`, `price_company`, `description`, `is_discount`, `max_discount`, `disponiblidad`, `state`, `unidad_medida`, `stock`, `include_igv`, `is_icbper`, `is_ivap`, `percentage_isc`, `is_especial_nota`, `created_at`, `updated_at`, `deleted_at`) VALUES
 (1, 'Placa Madre Asus ZT-124', 'MRAM16', 3, 'products/e3IEOdpDhTbvzP6cfMRmVbkVVlKPWzMdAMrVcgA4.png', 1600, 1500, 'FDSFDSFDS', 2, 45, 1, 1, 'NIU', 5, 2, 1, 1, 0, 0, '2025-07-19 02:29:10', '2025-07-19 02:29:10', NULL),
 (3, 'Memoria Ram 16GB 2027', '25101503', 2, 'products/bjDBQ7pHkcCXskNdeT1ziuDmGeRgMmAisRk915WX.png', 150, 120, 'FSDFDS', 2, 20, 1, 1, 'NIU', 5, 1, 1, 1, 0, 0, '2025-07-19 02:32:44', '2025-08-02 02:21:37', NULL),
-(4, 'Hyundai Tucson 2025', 'HT2025', 1, 'products/EkQ9zKukWQLpeUrSZNrzwxhzgkjyje4jjb2a1KaO.png', 45000, 43000, 'FDSFDS', 1, 0, 1, 1, 'NIU', 6, 2, 1, 1, 0, 0, '2025-07-19 02:35:34', '2025-08-07 00:58:44', NULL),
+(4, 'Hyundai Tucson 2026', 'HT2025', 1, 'products/EkQ9zKukWQLpeUrSZNrzwxhzgkjyje4jjb2a1KaO.png', 45000, 43000, 'FDSFDS', 1, 0, 1, 1, 'NIU', 6, 2, 1, 1, 0, 0, '2025-07-19 02:35:34', '2025-08-28 01:44:42', NULL),
 (6, 'Arroz Pilado - San Jose', 'ARP2025', 2, 'products/8JRIHRhpkyivpiQ0DpniwfQqYsc8t0czm3Tk8O67.png', 100, 100, 'FDSFDS', 1, 0, 1, 1, 'KGM', 100, 1, 0, 2, 0, 0, '2025-08-02 02:38:23', '2025-08-02 02:38:23', NULL),
 (7, 'Bolsa de Plastico - Ben', 'MRAM167', 2, 'products/wYPCnWCFJZ9fK4WpD2vjYiAh3cVfuZqP6Ym4ZdwE.png', 10, 15, 'fdfds', 1, 0, 1, 1, 'NIU', 1, 1, 2, 1, 0, 0, '2025-08-07 01:25:28', '2025-08-07 01:25:28', NULL),
 (8, 'Johnnie Walker 2025', 'ZTD23475', 2, 'products/TEdvu23GOmAts79DUvIzChGmYmiVOYzBZEEvxsSf.png', 1000, 1200, 'fdfdsfds', 1, 0, 1, 1, 'TU', 0, 2, 1, 1, 17, 0, '2025-08-07 02:01:29', '2025-08-09 01:25:18', NULL),
 (9, 'SISTEMA DE INVENTARIO PRIMER ADELANTO', 'SI2025I', 2, 'products/fsZm20OaQum0afZGZvnweu6Apc9YBiHVqJEsOSdL.png', 2500, 2500, 'FDSSDF', 1, 0, 1, 1, 'ZZ', 0, 2, 1, 1, 0, 0, '2025-08-23 00:49:49', '2025-08-23 00:51:34', NULL),
 (10, 'SISTEMA DE INVENTARIO SEGUNDO ADELANTO', 'SI2025II', 2, 'products/92X8Zhl5f0PNpnfsUFiwTidtr11cUr916jMQP8xi.png', 3500, 3500, 'FDSFFD', 1, 0, 1, 1, 'ZZ', 0, 2, 1, 1, 0, 0, '2025-08-23 00:50:25', '2025-08-23 00:51:24', NULL),
-(11, 'SISTEMA DE INVENTARIO TERCERA PAGO', 'SI2025III', 2, 'products/eAwHIQFCgv1nCI688rFMHJzvO7bLK3Mhlj5iT35Q.png', 10000, 10000, 'fdfds', 1, 0, 1, 1, 'ZZ', 0, 2, 1, 1, 0, 0, '2025-08-23 00:51:14', '2025-08-23 00:51:14', NULL);
+(11, 'SISTEMA DE INVENTARIO TERCERA PAGO', 'SI2025III', 2, 'products/eAwHIQFCgv1nCI688rFMHJzvO7bLK3Mhlj5iT35Q.png', 10000, 10000, 'fdfds', 1, 0, 1, 1, 'ZZ', 0, 2, 1, 1, 0, 0, '2025-08-23 00:51:14', '2025-08-23 00:51:14', NULL),
+(12, 'Descuento Global', 'DG', 2, 'products/2Ym2gV49tB0SMueUJKXw9Gyy6r6BssRky3ZL1nw8.png', 0, 0, 'dsfsd', 1, 0, 1, 1, 'ZZ', 1, 1, 1, 1, 0, 1, '2025-08-28 02:04:44', '2025-08-28 02:04:44', NULL),
+(13, 'Interés por mora', 'IPM23', 2, 'products/8Y9msdWF18fkgKT4ZzuUXHRNR8hTCSeYnOXuRhop.png', 0, 0, 'dsd', 1, 0, 1, 1, 'ZZ', 1, 1, 1, 1, 0, 1, '2025-08-28 02:05:27', '2025-08-28 02:05:27', NULL),
+(14, 'Aumento en el valor', 'AV20', 2, 'products/T0RcbQIx40Izn0XtyKpDErBjdvGGvlVLJdARQ1n1.png', 0, 0, 'dsds', 1, 0, 1, 1, 'ZZ', 1, 1, 1, 1, 0, 1, '2025-08-28 02:05:54', '2025-08-28 07:28:19', '2025-08-28 07:28:19'),
+(15, 'Penalidades/ otros conceptos', 'PC25', 2, 'products/TBjza2kYINi4jGRW3xKSWRNn2zSsL2r2XyWQTlbb.png', 0, 0, 'dsa', 1, 0, 1, 1, 'ZZ', 1, 1, 1, 1, 0, 1, '2025-08-28 02:06:40', '2025-08-28 02:06:40', NULL);
 
 -- --------------------------------------------------------
 
@@ -548,7 +746,9 @@ INSERT INTO `sales` (`id`, `serie`, `correlativo`, `n_operacion`, `user_id`, `cl
 (1021, 'F001', 12, 'F001-12', 1, 5, NULL, 2, 'S/.', 38179.052586, 45104.47630988, 0, 0, 0, NULL, NULL, 6925.42372388, 0, 1, 1, 1, 1289.99998988, 44038.00001, 1, NULL, '/storage/cdrs/68a90f3caef31.zip', '/storage/xml/R-20161515648-12-F001-1021 20250823_004548.xml', '2025-08-22 19:42:25', '2025-08-22 19:45:48', NULL),
 (1022, 'F001', 13, 'F001-13', 1, 5, NULL, 2, 'S/.', 2118.64407, 2500, 0, 0, 0, NULL, NULL, 381.35593, 0, 1, 1, 3, 0, 2500, 0, 'dsadsa', '/storage/cdrs/68a917f8d28d2.zip', '/storage/xml/R-20161515648-13-F001-1022 20250823_012304.xml', '2025-08-22 20:22:51', '2025-08-22 20:23:04', NULL),
 (1023, 'F001', 14, 'F001-14', 1, 5, NULL, 2, 'S/.', 2966.10169, 3500, 0, 0, 0, NULL, NULL, 533.89831, 0, 1, 1, 3, 0, 3500, 0, 'dfsdfds', '/storage/cdrs/68a918152ac54.zip', '/storage/xml/R-20161515648-14-F001-1023 20250823_012333.xml', '2025-08-22 20:23:27', '2025-08-22 20:23:33', NULL),
-(1024, 'F001', 15, 'F001-15', 1, 5, '[{\"id\":1022,\"n_operacion\":\"F001-13\",\"subtotal\":2118.64407,\"total\":2500,\"igv\":381.35593},{\"id\":1023,\"n_operacion\":\"F001-14\",\"subtotal\":2966.10169,\"total\":3500,\"igv\":533.89831}]', 2, 'S/.', 8474.57627, 10000, 0, 0, 0, NULL, 5084.75, 1525.42373, 915.25, 1, 1, 3, 0, 4000, 0, NULL, '/storage/cdrs/68a929040fc87.zip', '/storage/xml/R-20161515648-15-F001-1024 20250823_023548.xml', '2025-08-22 20:48:23', '2025-08-22 21:35:48', NULL);
+(1024, 'F001', 15, 'F001-15', 1, 5, '[{\"id\":1022,\"n_operacion\":\"F001-13\",\"subtotal\":2118.64407,\"total\":2500,\"igv\":381.35593}]', 2, 'S/.', 8474.57627, 10000, 0, 0, 0, NULL, 2118.64, 1525.42373, 381.36, 1, 1, 3, 0, 7500, 0, NULL, '/storage/cdrs/68a929040fc87.zip', '/storage/xml/R-20161515648-15-F001-1024 20250823_023548.xml', '2025-08-22 20:48:23', '2025-08-27 19:58:31', NULL),
+(1025, 'F001', 16, 'F001-16', 1, 2, NULL, 2, 'S/.', 37831.86441, 44641.6, 0, 0, 0, NULL, 0, 6809.73559, 0, 1, 1, 3, 0, 44641.6, 0, NULL, '/storage/cdrs/68afafbd8b377.zip', '/storage/xml/R-20161515648-16-F001-1025 20250828_012413.xml', '2025-08-27 20:24:04', '2025-08-27 20:24:13', NULL),
+(1026, 'F001', 17, 'F001-17', 1, 2, NULL, 2, 'S/.', 2902.37288, 3424.8, 0, 0, 0, NULL, 0, 522.42712, 0, 1, 1, 3, 0, 3424.8, 0, NULL, '/storage/cdrs/68b25802c286a.zip', '/storage/xml/R-20161515648-17-F001-1026 20250830_014642.xml', '2025-08-29 20:46:39', '2025-08-29 20:46:42', NULL);
 
 -- --------------------------------------------------------
 
@@ -623,7 +823,12 @@ INSERT INTO `sale_details` (`id`, `sale_id`, `product_id`, `product_categorie_id
 (37, 1021, 4, 1, 10, 0, 0, 0, 0, 'NIU', 1, 36440.677966, 43000, 0, 36440.677966, 6559.32203388, NULL, '2025-08-22 19:43:10', '2025-08-22 19:43:10', NULL),
 (38, 1022, 9, 2, 10, 0, 0, 0, 0, 'ZZ', 1, 2118.644068, 2500, 0, 2118.644068, 381.35593224, NULL, '2025-08-22 20:22:51', '2025-08-22 20:22:51', NULL),
 (39, 1023, 10, 2, 10, 0, 0, 0, 0, 'ZZ', 1, 2966.101695, 3500, 0, 2966.101695, 533.8983051, NULL, '2025-08-22 20:23:27', '2025-08-22 20:23:27', NULL),
-(40, 1024, 11, 2, 10, 0, 0, 0, 0, 'ZZ', 1, 8474.576271, 10000, 0, 8474.576271, 1525.42372878, NULL, '2025-08-22 20:48:23', '2025-08-22 20:48:23', NULL);
+(40, 1024, 11, 2, 10, 0, 0, 0, 0, 'ZZ', 1, 8474.576271, 10000, 0, 8474.576271, 1525.42372878, NULL, '2025-08-22 20:48:23', '2025-08-22 20:48:23', NULL),
+(41, 1025, 4, 1, 10, 0, 0, 0, 0, 'NIU', 1, 36440.677966, 43000, 0, 36440.677966, 6559.32203388, NULL, '2025-08-27 20:24:04', '2025-08-27 20:24:04', NULL),
+(42, 1025, 3, 2, 10, 0, 0, 0, 0, 'NIU', 1, 120, 141.6, 0, 120, 21.6, NULL, '2025-08-27 20:24:04', '2025-08-27 20:24:04', NULL),
+(43, 1025, 1, 3, 10, 0, 0, 0, 0, 'NIU', 1, 1271.186441, 1500, 0, 1271.186441, 228.81355938, NULL, '2025-08-27 20:24:04', '2025-08-27 20:24:04', NULL),
+(44, 1026, 1, 3, 10, 0, 0, 0, 0, 'NIU', 2, 1271.186441, 1500, 0, 2542.372882, 457.62711876, NULL, '2025-08-29 20:46:39', '2025-08-29 20:46:39', NULL),
+(45, 1026, 3, 2, 10, 0, 0, 0, 0, 'NIU', 3, 120, 141.6, 0, 360, 64.8, NULL, '2025-08-29 20:46:39', '2025-08-29 20:46:39', NULL);
 
 -- --------------------------------------------------------
 
@@ -684,7 +889,10 @@ INSERT INTO `sale_payments` (`id`, `sale_id`, `method_payment`, `amount`, `date_
 (35, 1021, 'EFECTIVO', 44038.00001, NULL, '2025-08-22 19:43:26', '2025-08-22 19:43:26', NULL),
 (36, 1022, 'EFECTIVO', 2500, NULL, '2025-08-22 20:22:51', '2025-08-22 20:22:51', NULL),
 (37, 1023, 'TARJETA DE CREDITO', 3500, NULL, '2025-08-22 20:23:27', '2025-08-22 20:23:27', NULL),
-(38, 1024, 'TRANSFERENCIA', 4000, NULL, '2025-08-22 20:48:23', '2025-08-22 20:48:23', NULL);
+(38, 1024, 'TRANSFERENCIA', 4000, NULL, '2025-08-22 20:48:23', '2025-08-28 00:58:18', '2025-08-28 00:58:18'),
+(39, 1024, 'TARJETA DE CREDITO', 7500, NULL, '2025-08-27 19:58:27', '2025-08-27 19:58:27', NULL),
+(40, 1025, 'EFECTIVO', 44641.6, NULL, '2025-08-27 20:24:04', '2025-08-27 20:24:04', NULL),
+(41, 1026, 'TRANSFERENCIA', 3424.8, NULL, '2025-08-29 20:46:39', '2025-08-29 20:46:39', NULL);
 
 -- --------------------------------------------------------
 
@@ -773,11 +981,39 @@ ALTER TABLE `companies`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indices de la tabla `electronic_notes`
+--
+ALTER TABLE `electronic_notes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `noperacion_sales` (`n_operacion`),
+  ADD UNIQUE KEY `sale_serie_correlativo` (`serie`,`correlativo`);
+
+--
+-- Indices de la tabla `electronic_note_details`
+--
+ALTER TABLE `electronic_note_details`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indices de la tabla `failed_jobs`
 --
 ALTER TABLE `failed_jobs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
+
+--
+-- Indices de la tabla `guia_remisions`
+--
+ALTER TABLE `guia_remisions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `noperacion_sales` (`n_operacion`),
+  ADD UNIQUE KEY `sale_serie_correlativo` (`serie`,`correlativo`);
+
+--
+-- Indices de la tabla `guia_remision_details`
+--
+ALTER TABLE `guia_remision_details`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `jobs`
@@ -906,7 +1142,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT de la tabla `clients`
 --
 ALTER TABLE `clients`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `companies`
@@ -915,10 +1151,34 @@ ALTER TABLE `companies`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de la tabla `electronic_notes`
+--
+ALTER TABLE `electronic_notes`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1010;
+
+--
+-- AUTO_INCREMENT de la tabla `electronic_note_details`
+--
+ALTER TABLE `electronic_note_details`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- AUTO_INCREMENT de la tabla `failed_jobs`
 --
 ALTER TABLE `failed_jobs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `guia_remisions`
+--
+ALTER TABLE `guia_remisions`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1002;
+
+--
+-- AUTO_INCREMENT de la tabla `guia_remision_details`
+--
+ALTER TABLE `guia_remision_details`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `jobs`
@@ -948,7 +1208,7 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT de la tabla `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
@@ -960,19 +1220,19 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `sales`
 --
 ALTER TABLE `sales`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1025;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1027;
 
 --
 -- AUTO_INCREMENT de la tabla `sale_details`
 --
 ALTER TABLE `sale_details`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT de la tabla `sale_payments`
 --
 ALTER TABLE `sale_payments`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT de la tabla `users`

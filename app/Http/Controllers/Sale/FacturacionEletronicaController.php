@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Sale;
 use App\Models\Company;
 use App\Models\Sale\Sale;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use App\Models\Nota\ElectronicNote;
 use App\Http\Controllers\Controller;
@@ -13,6 +14,7 @@ use Luecano\NumeroALetras\NumeroALetras;
 use App\Http\Resources\Sale\SaleResource;
 use App\Models\Nota\ElectronicNoteDetail;
 use App\Http\Controllers\Greenter\GreenterService;
+use App\Http\Resources\Nota\ElectronicNoteResource;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class FacturacionEletronicaController extends Controller
@@ -174,6 +176,18 @@ class FacturacionEletronicaController extends Controller
         return $data;
     }
 
+    public function getcorrelativoNote() {
+        $electronic_note = ElectronicNote::where("correlativo","<>",NULL)
+                                            ->where("n_operacion","<>",NULL)
+                                            ->orderBy("correlativo","desc")
+                                            ->first();
+        $correlativo = 1;
+        if($electronic_note){
+            $correlativo = $electronic_note->correlativo + 1;
+        }
+        return $correlativo;
+    }
+
     public function sunat_nota_seend(Request $request) {
 
         $sale_id = $request->sale_id;
@@ -201,8 +215,8 @@ class FacturacionEletronicaController extends Controller
                 "debt" => $request->debt,
                 "paid_out" => $request->paid_out,
                 "description" => $request->description,
-                "amount_anticipo" => $request->amount_anticipo ?? 0,
-                "sales_anticipos" => $request->sales_anticipos ? json_encode($request->sales_anticipos) : null,
+                // "amount_anticipo" => $request->amount_anticipo ?? 0,
+                // "sales_anticipos" => $request->sales_anticipos ? json_encode($request->sales_anticipos) : null,
                 // 
                 "retencion_igv" => $request->retencion_igv,
                 "igv_discount_general" => $request->igv_discount_general,
@@ -238,11 +252,71 @@ class FacturacionEletronicaController extends Controller
 
             // 
 
-            DB::commit();
+            $company = Company::first();
+
+            $data = $this->setTotales($note_electronic);
+            $data = $this->setLegends($data);
+
+            $see =  $this->greenter_service->getSee();
+
+            $data['tipo_doc'] = $request->doc_nota;// 07: Nota de Crédito / 08: Nota de Débito /
+            $data['serie'] = $request->serie;
+            $data['correlativo'] = $this->getcorrelativoNote();
+            $data['tipo_moneda'] = $request->currency == 'S/.' ? "PEN" : "USD";
+            $data['tipo_doc_afect'] = $sale->serie == 'F001' ? '01' : '03';
+            $data['num_doc_afect'] = $sale->n_operacion;//F001-50
+            $data['cod_motivo'] = $request->type_nota;
+            $data['des_motivo'] = $request->description_motivo;
+
+            $nota_electronic = $this->greenter_service->getNota($data,$company,$note_electronic);
+
+            $result = $see->send($nota_electronic);
+
+            $response = $this->greenter_service->sunatResponse($result);
+
+            if(!isset($response['error'])){
+
+                // Crear objeto DOMDocument
+                $dom = new \DOMDocument('1.0');
+                $dom->preserveWhiteSpace = false;
+                $dom->formatOutput = true;
+                $dom->loadXML($see->getFactory()->getLastXml());
+                // Formatear el XML con indentación
+                $formattedXml = $dom->saveXML();
+                // Generar un nombre único para el archivo
+                $file_name = "FF-".env("RUC").'-'.$data['correlativo'].'-'.$note_electronic->serie."-".$note_electronic->id.' '.now()->format('Ymd_His'). '.xml';
+                // Guardar en el disco storage/app/public/xml
+                Storage::disk('public')->put('xml/' . $file_name, $formattedXml);
+                // Obtener la ruta pública
+                $public_path_xml = Storage::url('xml/' . $file_name);
+
+                $note_electronic->update([
+                    "correlativo" => $data['correlativo'],
+                    "n_operacion" => $note_electronic->serie."-".$data['correlativo'],
+                    "cdr" => $response['cdrZip'],
+                    "xml" => $public_path_xml,
+                ]);
+                DB::commit();
+                return response()->json([
+                    "note_electronic" => ElectronicNoteResource::make($note_electronic),
+                    "message" => "LA NOTA ELECTRONICA SE REGISTRO Y EMITIO CORRECTAMENTE",
+                    "response" => $response,
+                ]);
+            }
+            return response()->json($response);
         } catch (\Throwable $th) {
             DB::rollBack();
             throw new HttpException(500,$th->getMessage());
             //throw $th;
         }
+    }
+
+    public function pdf($n_operacion) {
+        $electronic_note = ElectronicNote::where("n_operacion",$n_operacion)->first();
+        if(!$electronic_note){
+            return abort(404);
+        }
+        $pdf = Pdf::loadView('pdf_electronic_note', compact('electronic_note'));
+        return $pdf->stream('nota_electronica_'.$n_operacion.'.pdf');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Resources\Sale;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Nota\ElectronicNoteResource;
 
 class SaleResource extends JsonResource
 {
@@ -75,8 +76,8 @@ class SaleResource extends JsonResource
             "debt" => $this->resource->debt,
             "paid_out" => $this->resource->paid_out,
 
-            "igv_general" => round($igv_general,2),
             "total_general" =>  round($total_general,2),
+            "igv_general" => round($igv_general,2),
 
             "description" => $this->resource->description,
             "discount" => $this->resource->discount,
@@ -104,7 +105,9 @@ class SaleResource extends JsonResource
                     "date_payment"  => $sale_payment->date_payment ? Carbon::parse($sale_payment->date_payment)->format("Y-m-d") : NULL,
                 ];
             }),
-            "notas" => [],
+            "notas" => $this->resource->notas->map(function($nota) {
+                return ElectronicNoteResource::make($nota);
+            }),
         ];
     }
 }

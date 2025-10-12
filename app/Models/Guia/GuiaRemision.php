@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Models\Sale;
+namespace App\Models\Guia;
 
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Client\Client;
 use Illuminate\Support\Facades\DB;
-use App\Models\Nota\ElectronicNote;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Sale extends Model
+class GuiaRemision extends Model
 {
     use SoftDeletes;
     protected $fillable = [
@@ -20,27 +19,18 @@ class Sale extends Model
         "user_id",
         "client_id",
         "type_client",
-        "subtotal",
         "total",
-        "igv",
-        "state_sale",
-        "state_payment",
-        "type_payment",
-        "debt",
-        "paid_out",
-
+        "quantity_total",
+        "motivo_translado",
+        "type_transport",
+        "punto_partida",
+        "punto_llegada",
+        "transporte_datos",
+        "conductor_datos",
         "description",
-        "discount",
-        "retencion_igv",
-        "discount_global",
-        "igv_discount_general",
-        "n_comprobante_anticipo",
-        "amount_anticipo",
         "cdr",
         "xml",
-        "is_exportacion",
-        "currency",
-        "sales_anticipos",
+        "num_dam"
     ];
 
     public function setCreatedAtAttribute($value)
@@ -55,35 +45,23 @@ class Sale extends Model
         $this->attributes["updated_at"]= Carbon::now();
     }
 
-    public function user(){
+    public function user() {
         return $this->belongsTo(User::class,"user_id");
     }
 
-    public function client(){
+    public function client() {
         return $this->belongsTo(Client::class,"client_id");
     }
 
-    public function sale_details() {
-        return $this->hasMany(SaleDetail::class,"sale_id");
-    }
-
-    public function sale_payments() {
-        return $this->hasMany(SalePayment::class,"sale_id");
-    }
-
-    public function getFirstPaymentAttribute() {
-        return $this->sale_payments->first() ? $this->sale_payments->first() : NULL;
-    }
-
-    public function notas() {
-        return $this->hasMany(ElectronicNote::class,"n_comprobante","n_operacion");
+    public function details() {
+        return $this->hasMany(GuiaRemisionDetail::class,"guia_remision_id");
     }
 
     public function scopeFilterMultiple($query,$search_product,$categorie_id,$search,$search_client,
-    $state_sale,$type_payment,$start_date,$end_date){
+    $type_transport,$motivo_translado,$start_date,$end_date){
 
         if($search_product){
-            $query->whereHas("sale_details",function($q) use($search_product){
+            $query->whereHas("details",function($q) use($search_product){
                 $q->whereHas("product",function($suq) use($search_product){
                     $suq->where(DB::raw("CONCAT(products.title,' ',products.sku)"),"like","%".$search_product."%");
                 });
@@ -91,7 +69,7 @@ class Sale extends Model
         }
 
         if($categorie_id){
-            $query->whereHas("sale_details",function($q) use($categorie_id){
+            $query->whereHas("details",function($q) use($categorie_id){
                 $q->where("product_categorie_id",$categorie_id);
             });
         }
@@ -107,11 +85,11 @@ class Sale extends Model
             });
         }
 
-        if($state_sale){
-            $query->where("state_sale",$state_sale);
+        if($type_transport){
+            $query->where("type_transport",$type_transport);
         }
-        if($type_payment){
-            $query->where("type_payment",$type_payment);
+        if($motivo_translado){
+            $query->where("motivo_translado",$motivo_translado);
         }
 
         if($start_date && $end_date){

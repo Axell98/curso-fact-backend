@@ -11,6 +11,7 @@ use App\Http\Controllers\Client\CompanyController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Sale\SaleDetailController;
 use App\Http\Controllers\Sale\SalePaymentController;
+use App\Http\Controllers\Guia\GuiaRemisionController;
 use App\Http\Controllers\Product\CategorieController;
 use App\Http\Controllers\Sale\FacturacionEletronicaController;
 
@@ -55,6 +56,13 @@ Route::group([
     Route::resource("sale_payments",SalePaymentController::class);
 
     Route::post("seend_sunat",[FacturacionEletronicaController::class,"sunat_seend"]);
+    Route::post("sunat_nota_seend",[FacturacionEletronicaController::class,"sunat_nota_seend"]);
+
+    Route::get("guia/config",[GuiaRemisionController::class,"config"]);
+    Route::post("guia/index",[GuiaRemisionController::class,"index"]);
+    Route::resource("guia",GuiaRemisionController::class);
 });
 
+Route::get("guia-remision-pdf/{id}",[GuiaRemisionController::class,"pdf"]);
 Route::get("sales-pdf/{id}",[SaleController::class,"pdf"]);
+Route::get("electronic-note-pdf/{n_operacion}",[FacturacionEletronicaController::class,"pdf"]);

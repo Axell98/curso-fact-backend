@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Greenter;
 
 use DateTime;
+use Exception;
 use Greenter\See;
 use Greenter\Model\Sale\Note;
 use Greenter\Model\Sale\Cuota;
@@ -12,12 +13,20 @@ use Greenter\Model\Sale\Invoice;
 use Greenter\Model\Client\Client;
 use Greenter\Model\Company\Address;
 use Greenter\Model\Company\Company;
+use Greenter\Model\Despatch\Driver;
 use Greenter\Model\Sale\Detraction;
 use Greenter\Model\Sale\Prepayment;
 use Greenter\Model\Sale\SaleDetail;
+use Greenter\Model\Despatch\Vehicle;
+use Greenter\Model\Despatch\Despatch;
+use Greenter\Model\Despatch\Shipment;
+use Greenter\Model\Despatch\Direction;
 use Greenter\Model\Sale\SalePerception;
 use Illuminate\Support\Facades\Storage;
 use Greenter\Ws\Services\SunatEndpoints;
+use Greenter\Model\Despatch\Transportist;
+use Greenter\Model\Despatch\AdditionalDoc;
+use Greenter\Model\Despatch\DespatchDetail;
 use Greenter\Model\Sale\FormaPagos\FormaPagoContado;
 use Greenter\Model\Sale\FormaPagos\FormaPagoCredito;
 
@@ -204,7 +213,14 @@ class GreenterService {
      public function getDetails($sale_details) {
         $greenter_sale_details = [];
         foreach ($sale_details as $sale_detail) {
-            $mto_valor_unitario = $sale_detail->price_base;
+            
+            $mto_valor_unitario = 0;
+            if($sale_detail->electronic_note){
+                $mto_valor_unitario = round($sale_detail->subtotal/$sale_detail->quantity,2);
+            }else{
+                $mto_valor_unitario = $sale_detail->price_base;
+            }
+
             $mto_valor_venta = $sale_detail->subtotal;
             $mto_base_igv = $sale_detail->subtotal + $sale_detail->isc;
 
@@ -387,5 +403,144 @@ class GreenterService {
         ->setLegends($this->getLegends($data['legends']));
 
         return $nota;
+    }
+
+    public function getSeeApi() {
+        $api = new \Greenter\Api(env("APP_ENV") == "production" ?
+            ['auth' => 'https://api-seguridad.sunat.gob.pe/v1',
+            'cpe' => 'https://api-cpe.sunat.gob.pe/v1',]
+            :
+            ['auth' => 'https://gre-test.nubefact.com/v1',
+            'cpe' => 'https://gre-test.nubefact.com/v1',]
+        );
+
+        $certificate = Storage::get('certificate-demo.pem');
+        if (!$certificate) {
+            throw new Exception('No se pudo cargar el certificado');
+        }
+        
+        return $api->setBuilderOptions([
+                'strict_variables' => true,
+                'optimizations' => 0,
+                'debug' => true,
+                'cache' => false,
+            ])
+            ->setApiCredentials(
+                env("APP_ENV") == "production" ? env("CLIENT_ID") : 'test-85e5b0ae-255c-4891-a595-0b98c65c9854', 
+                env("APP_ENV") == "production" ? env("CLIENT_SECRET") : 'test-Hty/M6QshYvPgItX2P0+Kw=='
+            )
+            ->setClaveSOL(
+                env("RUC"), 
+                env("USER_SOL"), 
+                env("USER_PASS")
+            )
+            ->setCertificate($certificate);
+    }
+
+    public function getGuiaEnvio($guia_remision,$company)
+    {
+        $transp = null;
+        if($guia_remision->transporte_datos){//TRANSPORTE ES PUBLICO
+            $transporte_datos = json_decode($guia_remision->transporte_datos,true);
+            $transp = new Transportist();
+            $transp->setTipoDoc('6')
+                ->setNumDoc($transporte_datos["n_document_ruc"])
+                ->setRznSocial($transporte_datos["razon_social_transportista"])
+                ->setNroMtc($transporte_datos["nro_mtc"]);
+        }
+
+        $vehiculoPrincipal = null;
+        if($guia_remision->conductor_datos){//TRANSPORTE ES PRIVADO
+            $conductor_datos = json_decode($guia_remision->conductor_datos,true);
+
+            $vehiculoPrincipal = (new Vehicle())
+                                ->setPlaca($conductor_datos["placa_vehiculo"]);
+    
+            $chofer = (new Driver())
+                ->setTipo('Principal')
+                ->setTipoDoc($conductor_datos["type_document"])
+                ->setNroDoc($conductor_datos["n_document"])
+                ->setLicencia($conductor_datos["n_licencia"])
+                ->setNombres($conductor_datos["full_name_conductor"])
+                ->setApellidos($conductor_datos["full_name_conductor"]);
+        }
+
+        $punto_partida = json_decode($guia_remision->punto_partida,true);
+        $punto_llegada = json_decode($guia_remision->punto_llegada,true);
+
+        $shipment = (new Shipment())
+                    ->setCodTraslado($guia_remision->motivo_translado) // Cat.20 - Venta
+                    ->setModTraslado($guia_remision->type_transport) // Cat.18 - Transp. Privado
+                    ->setFecTraslado(new DateTime())
+                    ->setPesoTotal($guia_remision->total)
+                    ->setUndPesoTotal('KGM');
+                if($vehiculoPrincipal){
+                    $shipment->setVehiculo($vehiculoPrincipal)
+                    ->setChoferes([$chofer]);
+                }
+                if($guia_remision->transporte_datos){
+                    $shipment->setTransportista($transp);
+                }
+                $shipment->setPartida(
+                    (new Direction($punto_partida["ubigeo_distrito"], $punto_partida["address"]))
+                    ->setCodLocal("0000")
+                    ->setRuc(in_array($guia_remision->motivo_translado,['04']) ?  $company->n_document : $guia_remision->client->n_document))//in_array($guia_remision->motivo_translado,['04']) ? '20161515648'  :
+                ->setLlegada((new Direction($punto_llegada["ubigeo_distrito"], $punto_llegada["address"]))
+                    ->setCodLocal(in_array($guia_remision->motivo_translado,['18']) ? null :  "0001")
+                    ->setRuc(in_array($guia_remision->motivo_translado,['04','02']) ?  $company->n_document : $guia_remision->client->n_document)
+                );
+        return $shipment;
+    }
+
+    public function getGuiaDetails($guia_details)
+    {
+        $details = [];
+
+        foreach ($guia_details as $guia_detail) {
+            $despatch_detail = new DespatchDetail();
+            $despatch_detail->setCantidad($guia_detail->quantity)
+                ->setUnidad($guia_detail->unidad_medida)
+                ->setDescripcion($guia_detail->product->title)
+                ->setCodigo('P001');
+            array_push($details,$despatch_detail);
+        }
+        return $details;
+    }
+    
+
+    public function getGRECompany($company): \Greenter\Model\Company\Company
+    {
+        return (new \Greenter\Model\Company\Company())
+            ->setRuc($company->n_document)
+            ->setRazonSocial($company->razon_social);
+            // ->setRuc('20161515648')
+            // ->setRazonSocial('GREENTER S.A.C.');
+    }
+
+    public function getGuia($data,$company,$guia_remision) {
+        $despatch = (new Despatch())
+                        ->setVersion('2022')
+                        ->setTipoDoc($data['tipo_doc']) // Guia 09 - Catalog. 01 
+                        ->setSerie($data['serie'])
+                        ->setCorrelativo($data['correlativo'])
+                        ->setFechaEmision(new DateTime())
+                        ->setCompany($this->getGRECompany($company))//$this->getCompany($company))
+                        ->setDestinatario((new Client())
+                            ->setTipoDoc('6')
+                            ->setNumDoc( in_array($guia_remision->motivo_translado,['04','02']) ? $company->n_document  : $guia_remision->client->n_document)
+                            ->setRznSocial($guia_remision->client->full_name))
+                        ->setEnvio($this->getGuiaEnvio($guia_remision,$company))
+                        //Productos
+                        ->setDetails($this->getGuiaDetails($guia_remision->details));
+
+        if($guia_remision->motivo_translado == '08' || $guia_remision->motivo_translado == '09'){
+            $relDoc = (new AdditionalDoc())
+                        ->setTipo('50')
+                        ->setTipoDesc('Numero de declaracion aduanera (DAM)')
+                        ->setNro($guia_remision->num_dam);//118-2024-10-4 importacion - 082-2024-40-12345 exportacion
+            $despatch->setAddDocs([$relDoc]);
+        }
+        
+        return $despatch;
     }
 }
